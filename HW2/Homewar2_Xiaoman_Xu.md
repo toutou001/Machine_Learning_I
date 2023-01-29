@@ -1,11 +1,11 @@
----
-title: "Homework2_Xiaoman_Xu"
-author: "Xiaoman Xu"
-date: "2023-01-23"
-output: github_document
----
+Homework2_Xiaoman_Xu
+================
+Xiaoman Xu
+2023-01-23
+
 # Source code
-```{r}
+
+``` r
 ## load prostate data
 prostate <- 
   read.table(url('https://web.stanford.edu/~hastie/ElemStatLearn/datasets/prostate.data'))
@@ -74,8 +74,11 @@ lin_pred_lm <- predict(lin_fit_lm, data.frame(lpsa=x_grid))
 
 ## plot predictions from 'lm'
 lines(x=x_grid, y=lin_pred_lm, col='pink', lty=2, lwd=2)
+```
 
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
+``` r
 ##################################
 ## try modifying the loss function
 ##################################
@@ -93,7 +96,11 @@ custom_loss <- function(y, yhat)
 err_grd <- seq(-1,1,length.out=200)
 plot(err_grd, custom_loss(err_grd,0), type='l',
      xlab='y-yhat', ylab='custom loss')
+```
 
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-1-2.png)<!-- -->
+
+``` r
 ## fit linear model with custom loss
 lin_beta_custom <- fit_lin(y=prostate_train$lcavol,
                     x=prostate_train$lpsa,
@@ -111,11 +118,11 @@ lines(x=x_grid, y=lin_pred, col='darkgreen', lwd=2)
 lines(x=x_grid, y=lin_pred_custom, col='pink', lwd=2, lty=2)
 ```
 
-
-
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-1-3.png)<!-- -->
 
 # 1. Write functions that implement the L1 loss and tilted absolute loss functions.
-```{r}
+
+``` r
 L1_loss_tilted <- function(y, yhat, t){
   qrnn::tilted.abs(x=(y-yhat), tau=t)
 }
@@ -123,12 +130,13 @@ L1_loss_tilted <- function(y, yhat, t){
 err_grd <- seq(-1,1,length.out=200)
 plot(err_grd, L1_loss_tilted(err_grd,0, 0.75), type='l',
      xlab='y-yhat', ylab='L1 loss')
-
 ```
 
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-# 2. Create a figure that shows lpsa (x-axis) versus lcavol (y-axis). Add and label (using the 'legend' function) the linear model predictors associated with L2 loss, L1 loss, and tilted absolute value loss for tau = 0.25 and 0.75.
-```{r}
+# 2. Create a figure that shows lpsa (x-axis) versus lcavol (y-axis). Add and label (using the ‘legend’ function) the linear model predictors associated with L2 loss, L1 loss, and tilted absolute value loss for tau = 0.25 and 0.75.
+
+``` r
 fit_lin_L1 <- function(y, x, loss=L1_loss_tilted, beta_init = c(-0.51, 0.75), t) {
   err <- function(beta)
     mean(loss(y,  beta[1] + beta[2]*x, t))
@@ -175,10 +183,11 @@ legend("topleft",
 title(main = " L1 loss, L2 loss, and absolute value loss with tau = 0.25 and 0.75")
 ```
 
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-# 3.Write functions to fit and predict from a simple nonlinear model with three parameters defined by 'beta[1] + beta[2]*exp(-beta[3]*x)'. Hint: make copies of 'fit_lin' and 'predict_lin' and modify them to fit the nonlinear model. Use c(-1.0, 0.0, -0.3) as 'beta_init'.
+# 3.Write functions to fit and predict from a simple nonlinear model with three parameters defined by ‘beta\[1\] + beta\[2\]*exp(-beta\[3\]*x)’. Hint: make copies of ‘fit_lin’ and ‘predict_lin’ and modify them to fit the nonlinear model. Use c(-1.0, 0.0, -0.3) as ‘beta_init’.
 
-```{r}
+``` r
 ## fit nonlinear model using numerical optimization
 fit_nonlin_L2 <- function(y, x, loss=L2_loss, beta_init = c(-1.0, 0.0, -0.3)) {
   err <- function(beta)
@@ -208,13 +217,13 @@ plot_psa_data()
 
 ## plot predictions
 lines(x=x_grid, y=nonlin_pred, col='darkgreen', lwd=2)
-                        
 ```
 
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-# 4. Create a figure that shows lpsa (x-axis) versus lcavol (y-axis). Add and label (using the 'legend' function) the nonlinear model predictors associated with L2 loss, L1 loss, and tilted absolute value loss for tau = 0.25 and 0.75.
+# 4. Create a figure that shows lpsa (x-axis) versus lcavol (y-axis). Add and label (using the ‘legend’ function) the nonlinear model predictors associated with L2 loss, L1 loss, and tilted absolute value loss for tau = 0.25 and 0.75.
 
-```{r}
+``` r
 ## Rewrite function to make L1 has tau value
 fit_nonlin_L1 <- function(y, x, loss=L1_loss_tilted, beta_init = c(-1.0, 0.0, -0.3), t) {
   err <- function(beta)
@@ -282,6 +291,4 @@ legend("topleft",
 title(main = " L1 loss, L2 loss, and absolute value loss with tau = 0.25 and 0.75")
 ```
 
-
-
-
+![](Homewar2_Xiaoman_Xu_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
