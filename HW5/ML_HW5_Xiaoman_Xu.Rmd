@@ -1,0 +1,118 @@
+---
+title: "ML_HW5"
+author: "Xiaoman Xu"
+date: "2023-04-04"
+output: 
+  github_document: default
+---
+#Goal: Understand and implement a random forest classifier.
+#Using the “vowel.train” data, develop a random forest (e.g., using the "randomForest" package) or gradient boosted classifier for the vowel data.
+# 1. Fit a random forest or gradient boosted model to the “vowel.train” data using all of the 11 features using the default values of the tuning parameters.
+# 2. Use 5-fold CV to tune the number of variables randomly sampled as candidates at each split if using random forest, or the ensemble size if using gradient boosting.
+# 3. With the tuned model, make predictions using the majority vote method, and compute the misclassification rate using the ‘vowel.test’ data.
+
+
+```{r}
+library('magrittr') ## for '%<>%' operator
+library('dplyr')
+library('rpart')
+#install.packages('partykit')
+library('partykit')
+library('utils')
+library('manipulate')
+#install.packages('randomForest')
+library('randomForest')
+library(caret)
+#install.packages('xgboost')
+library('xgboost')
+
+
+library('tidyverse')
+#install.packages('gpairs')
+library('gpairs')   ## pairs plot
+library('viridis')  ## viridis color palette
+library('caret')
+library('corrplot')
+library('ggplot2')
+```
+
+# Import the training and testing data
+```{r}
+df_train <- read_csv(url('https://hastie.su.domains/ElemStatLearn/datasets/vowel.train'))
+df_test <- read.csv(url('https://hastie.su.domains/ElemStatLearn/datasets/vowel.test'))
+```
+
+
+
+```{r}
+df_train <- df_train %>% 
+  select(-row.names) %>% 
+  mutate(y = as.factor(y))
+
+df_test <- df_test %>% 
+  select(-row.names) %>% 
+  mutate(y = as.factor(y))
+
+#get the training and testing data
+x_train <- df_train[,2:11]
+y_train <- df_train[,1]
+
+x_test <- df_test[,2:11]
+y_test <- df_test[,1]
+```
+
+
+# 1. Fit a random forest or gradient boosted model to the “vowel.train” data using all of the 11 features using the default values of the tuning parameters.
+```{r}
+# Fit a random forest model using all 11 features
+rf_model <- randomForest(y ~ ., data=df_train)
+```
+
+
+# 2. Use 5-fold CV to tune the number of variables randomly sampled as candidates at each split if using random forest, or the ensemble size if using gradient boosting.
+```{r}
+# mtry parameter (i.e., the number of variables randomly sampled as candidates at each split) when fitting a random forest model
+
+set.seed('123')
+vowel_folds  <- createFolds(df_train$y, k=5)
+#print(vowel_folds)
+sapply(vowel_folds, length)  
+
+
+# Set up the 5-fold cross-validation scheme
+ctrl <- trainControl(method = "cv", number = 5, index = vowel_folds)
+
+# Set up the tuning parameters for mtry
+tuneGrid <- expand.grid(mtry = seq(1, ncol(df_train) - 1, by = 1))
+
+
+# Fit the random forest model with 5-fold CV to tune mtry
+rf_fit <- train(y ~ ., 
+                data = df_train, 
+                #y_train, 
+                method = "rf", 
+                metric = "Accuracy", 
+                trControl = ctrl,
+                tuneGrid =  tuneGrid
+                )
+
+
+# Print the best value of mtry
+print(rf_fit$bestTune$mtry)
+
+plot(rf_fit)
+```
+
+
+# 3. With the tuned model, make predictions using the majority vote method, and compute the misclassification rate using the ‘vowel.test’ data.
+```{r}
+
+# Make predictions on the test data using the majority vote method
+rf_pred <- predict(rf_model, x_test)
+
+# Compute the misclassification rate
+misclassification_rate <- sum(rf_pred != y_test) / length(y_test)
+print(paste("Misclassification rate:", round(misclassification_rate, 4)))
+```
+
+
